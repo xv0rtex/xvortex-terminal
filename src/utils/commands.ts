@@ -136,7 +136,7 @@ const githubUrl = import.meta.env.VITE_GITHUB_URL || "https://github.com/darkxvo
 export const commands: Record<string, (args: string[]) => Promise<string> | string> = {
   help: () => {
     const categories = {
-      Personal: ["whoami", "about", "proyects", "github", "linkedin", "email"],
+      Personal: ["whoami", "proyects", "github", "linkedin", "email"],
       System: ["help", "clear", "date", "exit", "neofetch", "echo", "sudo"],
       Productivity: ["todo", "weather"],
       Customization: ["theme", "banner"],
@@ -165,9 +165,9 @@ export const commands: Record<string, (args: string[]) => Promise<string> | stri
     return output;
   },
   // Portfolio commands
-  about: () => {
-    return aboutText;
-  },
+  //about: () => {
+  //  return aboutText;
+  //},
   proyects: () => {
     return projectsText;
   },
