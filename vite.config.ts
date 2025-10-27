@@ -5,6 +5,8 @@ import { svelte } from '@sveltejs/vite-plugin-svelte';
 export default defineConfig({
   plugins: [svelte()],
   server: {
-    port: 3000,
+    host: true, // permite acceder desde fuera (Cloudflared u otras IPs)
+    port: 3000, // el puerto que usas
+    allowedHosts: ['soriaruiz.com'], // permite tu dominio del t  nel
   },
 });
