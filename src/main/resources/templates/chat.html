@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments :: layout(~{::main})}">
+<head>
+    <title>dsr - Chat</title>
+</head>
+<body>
+    <main>
+        <h1>Asistente de IA</h1>
+        <p>Habla con mi asistente de IA para saber más sobre mis habilidades, proyectos y trayectoria.</p>
+        
+        <!-- Chat / Terminal Interaction Area -->
+        <div id="terminal-history">
+            <div><span class="prompt">guest@dsr:~$</span> ./chat-assistant.sh</div>
+            <div class="response">
+                Iniciando Asistente de IA...<br>
+                Escribe tu pregunta abajo o 'help' para ver los comandos.
+            </div>
+        </div>
+        
+        <div class="input-line">
+            <span class="prompt">guest@dsr:~$</span>
+            <textarea id="command-input" rows="1" autocomplete="off" autofocus></textarea>
+        </div>
+    </main>
+</body>
+</html>

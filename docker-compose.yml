@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  spring-app:
+    build: .
+    container_name: spring-app
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/app
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      groq.api.key: ${GROQ_API_KEY}
+      groq.system.prompt: ${GROQ_SYSTEM_PROMPT}
