@@ -85,7 +85,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 try {
                     // Check if there is a custom API endpoint defined in the body dataset
-                    const apiEndpoint = document.body.dataset.apiEndpoint || '/api/chat';
+                    let apiEndpoint = '/api/chat';
+                    if (document.body && document.body.dataset && document.body.dataset.apiEndpoint) {
+                        apiEndpoint = document.body.dataset.apiEndpoint;
+                    }
                     
                     const response = await fetch(apiEndpoint, {
                         method: 'POST',

@@ -1,0 +1,10 @@
+target/
+.git
+.env
+.idea
+.vscode
+.mvn
+mvnw
+mvnw.cmd
+*.iml
+.DS_Store

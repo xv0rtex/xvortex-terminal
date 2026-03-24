@@ -1,6 +1,6 @@
 FROM maven:3.9.6-eclipse-temurin-21
 
-WORKDIR /app
+WORKDIR /home/soriaruiz
 
 # Copiamos todo el proyecto
 COPY . .

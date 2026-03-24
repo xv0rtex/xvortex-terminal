@@ -7,10 +7,10 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - .:/app
+      - .:/home/soriaruiz
+      - /home/data/post:/home/soriaruiz/src/main/resources/posts
+      - /home/data/form:/home/soriaruiz/form
+      - /home/data/logs:/home/soriaruiz/logs
     restart: unless-stopped
     env_file:
       - .env
-    environment:
-      groq.api.key: ${GROQ_API_KEY}
-      groq.system.prompt: ${GROQ_SYSTEM_PROMPT}

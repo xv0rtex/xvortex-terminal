@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>dsr</title>
     <link rel="icon" type="image/png" th:href="@{/favicon.png}">
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css(v=${#dates.createNow().time})}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -239,7 +239,7 @@
     }
 
 </script>
-<script src="/js/terminal.js"></script>
+<script th:src="@{/js/terminal.js(v=${#dates.createNow().time})}"></script>
 
 </body>
 </html>
