@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments :: layout(~{::main})}">
+<head>
+    <title th:text="'dsr - Blog'">dsr - Blog</title>
+</head>
+<body>
+    <main>
+        <h1>Blog</h1>
+        <p><span class="prompt">guest@dsr:~$</span> ls -l ./posts</p>
+        
+        <div th:if="${currentTag}" class="tag-filter">
+            <p>Filtrando por etiqueta: <span class="tag" th:text="'#' + ${currentTag}"></span> 
+               <a th:href="@{/blog}" style="font-size: 0.8em; margin-left: 10px;">[limpiar]</a>
+            </p>
+        </div>
+
+        <div class="tags-cloud" th:if="${tags != null and !tags.empty}">
+            <span class="prompt">Etiquetas:</span>
+            <span th:each="tag : ${tags}">
+                <a th:href="@{/blog(tag=${tag})}" th:text="'[' + ${tag} + ']'" 
+                   th:class="${tag == currentTag ? 'active-tag' : ''}"></a>
+            </span>
+        </div>
+        
+        <div th:each="post : ${posts}" class="blog-post">
+            <span class="meta" th:text="${#temporals.format(post.date, 'dd-MM-yyyy')}"></span>
+            <h2><a th:href="@{'/blog/' + ${post.id}}" th:text="${post.title}">Post Title</a></h2>
+            
+            <div class="post-tags" th:if="${!post.tags.empty}">
+                <span th:each="tag : ${post.tags}">
+                    <a th:href="@{/blog(tag=${tag})}" th:text="'#' + ${tag}" class="small-tag"></a>
+                </span>
+            </div>
+
+            <p th:text="${post.excerpt}">Summary...</p>
+        </div>
+        
+        <div th:if="${posts.empty}">
+            <p>No se encontraron publicaciones.</p>
+        </div>
+    </main>
+</body>
+</html>

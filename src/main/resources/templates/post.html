@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments :: layout(~{::main})}">
+<head>
+    <title th:text="${post.title} + ' - dsr'">Post Title</title>
+</head>
+<body>
+    <main>
+        <div class="post-header">
+            <span class="prompt">guest@dsr:~$</span> cat <span th:text="${post.id} + '.md'"></span>
+            <br>
+            <span class="meta" th:text="'Última modificación: ' + ${#temporals.format(post.date, 'dd-MM-yyyy')}"></span>
+            <br>
+            <div class="post-tags" th:if="${!post.tags.empty}">
+                <span class="prompt">Etiquetas:</span>
+                <span th:each="tag : ${post.tags}">
+                    <a th:href="@{/blog(tag=${tag})}" th:text="'#' + ${tag}"></a>
+                </span>
+            </div>
+        </div>
+        
+        <article th:utext="${post.content}">
+            Content
+        </article>
+
+        <br>
+        <p><a th:href="@{/blog}">&lt;&lt; cd ..</a></p>
+    </main>
+</body>
+</html>

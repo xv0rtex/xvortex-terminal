@@ -1,13 +1,16 @@
+version: '3.8'
+
 services:
-  terminal:
-    #image: ghcr.io/m4tt72/terminal:svelte
+  spring-app:
     build: .
-    container_name: terminal
-    restart: unless-stopped
+    container_name: spring-app
     ports:
-      - 3000:3000
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80"]
-      interval: 200s
-      timeout: 200s
-      retries: 5
+      - "8080:8080"
+    volumes:
+      - .:/app
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      groq.api.key: ${GROQ_API_KEY}
+      groq.system.prompt: ${GROQ_SYSTEM_PROMPT}

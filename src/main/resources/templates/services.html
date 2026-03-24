@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments :: layout(~{::main})}">
+<head>
+    <title>dsr - Services</title>
+</head>
+<body>
+    <main>
+        <h1>Servicios</h1>
+        <p>Selecciona un servicio del menú interactivo.</p>
+        
+        <!-- Chat / Terminal Interaction Area -->
+        <div id="terminal-history">
+            <div><span class="prompt">guest@dsr:~$</span> ls services/</div>
+            <div class="response" style="white-space: pre-wrap;" th:text="${initialTerminalOutput}">
+                <!-- Initial output will be injected here -->
+            </div>
+        </div>
+        
+        <div class="input-line">
+            <span class="prompt">guest@dsr:~$</span>
+            <textarea id="command-input" rows="1" autocomplete="off" autofocus></textarea>
+        </div>
+    </main>
+</body>
+</html>

@@ -1,16 +1,13 @@
-FROM node:lts-alpine as dependencies
-WORKDIR /app
-COPY package.json yarn.lock ./
-RUN yarn install --frozen-lockfile
+FROM maven:3.9.6-eclipse-temurin-21
 
-FROM node:lts-alpine as builder
 WORKDIR /app
+
+# Copiamos todo el proyecto
 COPY . .
-COPY --from=dependencies /app/node_modules ./node_modules
-RUN yarn build
 
-FROM lipanski/docker-static-website:latest
-COPY --from=builder /app/dist .
-COPY httpd.conf .
-EXPOSE 3000
-CMD ["/busybox-httpd", "-f", "-v", "-p", "3000", "-c", "httpd.conf"]
+# Exponemos el puerto típico de Spring
+EXPOSE 8080
+
+# Ejecutamos como si fuera mvn spring-boot:run
+CMD ["mvn", "spring-boot:run"]
+
