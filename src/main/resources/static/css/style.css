@@ -39,16 +39,15 @@ a:hover {
     width: 1000px;
     max-width: 90vw;
     height: 85vh;
-    position: absolute;
-    top: 7.5%;
-    left: 10%;
     background-color: var(--bg-color);
-    border-radius: 8px;
+    border-radius: 10px;
     box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    position: absolute;
     display: flex;
     flex-direction: column;
     border: 1px solid #333;
-    transition: width 0.3s, height 0.3s, top 0.3s, left 0.3s, opacity 0.2s;
+    /* Remove transform transition to avoid z-index stacking context bugs */
+    transition: width 0.3s, height 0.3s, opacity 0.2s;
 }
 
 .container.maximized {
@@ -61,9 +60,10 @@ a:hover {
 }
 
 .container.minimized {
+    /* Instead of transform, just hide it */
     opacity: 0;
     pointer-events: none;
-    transform: scale(0.8) translateY(200px);
+    visibility: hidden;
 }
 
 .container.closed {
@@ -150,7 +150,7 @@ a:hover {
 
 /* Dock / Taskbar */
 .dock {
-    position: absolute;
+    position: fixed;
     bottom: 20px;
     left: 50%;
     transform: translateX(-50%);
@@ -162,7 +162,8 @@ a:hover {
     gap: 15px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-    z-index: 1000;
+    z-index: 5; /* Keep it below windows */
+    transition: transform 0.3s ease;
 }
 
 .dock-item {
@@ -470,3 +471,441 @@ pre::-webkit-scrollbar {
 .input-line {
     position: relative;
 }
+
+/* HackSimulator Styles */
+.hack-window {
+    padding: 20px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Flag Progress Section */
+.ctf-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.ctf-timer {
+    background: #1e1b18;
+    border: 1px solid #444;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-family: 'Fira Code', monospace;
+    font-size: 1.5em;
+    color: #ff5f56;
+    font-weight: bold;
+    text-align: center;
+}
+
+.flag-progress-container {
+    background: #1e1b18;
+    border: 1px solid #444;
+    border-radius: 8px;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex: 1;
+    margin-right: 15px;
+}
+
+.flag-progress-slots {
+    display: flex;
+    gap: 10px;
+    flex-grow: 1;
+    margin-right: 20px;
+}
+
+.flag-slot {
+    flex: 1;
+    background: #2a2a2a;
+    border: 1px dashed #666;
+    border-radius: 4px;
+    padding: 10px;
+    text-align: center;
+    color: #888;
+    font-family: monospace;
+    min-height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    word-break: break-all;
+}
+
+.flag-slot.filled {
+    border: 1px solid var(--prompt-color);
+    color: var(--prompt-color);
+    background: rgba(143, 188, 143, 0.1);
+}
+
+.flag-input-area {
+    display: flex;
+    gap: 10px;
+}
+
+.flag-input-area input {
+    padding: 8px;
+    background: #2a2a2a;
+    border: 1px solid #444;
+    color: var(--text-color);
+    border-radius: 4px;
+    width: 200px;
+}
+
+.flag-input-area button {
+    padding: 8px 15px;
+    background: var(--prompt-color);
+    color: #000;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.hack-layout {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    height: calc(100% - 80px);
+}
+
+.browser-simulator {
+    flex: 2;
+    border: 2px solid #444;
+    border-radius: 8px;
+    background: #fff;
+    color: #000;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+}
+
+.browser-bar {
+    background: #e0e0e0;
+    padding: 10px;
+    display: flex;
+    gap: 10px;
+    border-bottom: 2px solid #ccc;
+}
+
+.browser-bar input {
+    flex: 1;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.browser-bar button {
+    padding: 5px 15px;
+    cursor: pointer;
+}
+
+.browser-content {
+    padding: 20px;
+    flex: 1;
+    overflow-y: auto;
+    position: relative;
+}
+
+/* Simulated DevTools */
+.simulated-devtools {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 40%;
+    background: #242424;
+    border-top: 2px solid #444;
+    display: none;
+    flex-direction: column;
+    color: #ccc;
+    font-family: monospace;
+    z-index: 100;
+}
+
+.devtools-header {
+    background: #333;
+    padding: 5px 10px;
+    display: flex;
+    gap: 15px;
+    border-bottom: 1px solid #111;
+}
+
+.devtools-tab {
+    cursor: pointer;
+    padding: 2px 5px;
+}
+
+.devtools-tab.active {
+    color: #fff;
+    border-bottom: 2px solid var(--prompt-color);
+}
+
+.devtools-content {
+    padding: 10px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.devtools-close {
+    margin-left: auto;
+    cursor: pointer;
+    color: #ff5f56;
+}
+
+.cookie-item {
+    display: flex;
+    border-bottom: 1px solid #444;
+    padding: 5px 0;
+}
+
+.cookie-name {
+    width: 150px;
+    font-weight: bold;
+    color: #9cdcfe;
+}
+
+.cookie-value {
+    flex: 1;
+    color: #ce9178;
+}
+
+.html-node {
+    margin-left: 15px;
+    color: #808080;
+}
+
+.html-tag {
+    color: #569cd6;
+}
+
+.html-attr {
+    color: #9cdcfe;
+}
+
+.html-string {
+    color: #ce9178;
+}
+
+.sim-page h2 {
+    color: #333;
+    margin-top: 0;
+}
+
+.sim-page a {
+    color: #0066cc;
+    border-bottom: none;
+}
+
+.sim-page a:hover {
+    background-color: transparent;
+    text-decoration: underline;
+    color: #004499;
+}
+
+.right-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.ai-chat {
+    flex: 1;
+    border: 1px solid #444;
+    border-radius: 8px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    background: #2a2a2a;
+}
+
+.ai-chat h3 {
+    margin-top: 0;
+    font-size: 1.2em;
+}
+
+.chat-output {
+    flex: 1;
+    overflow-y: auto;
+    border: 1px solid #333;
+    background: #1e1b18;
+    padding: 10px;
+    margin-bottom: 10px;
+    min-height: 150px;
+    max-height: 200px; /* Limita la altura y fuerza el scroll interno */
+}
+
+.player-msg {
+    color: var(--prompt-color);
+    margin-bottom: 5px;
+}
+
+.ai-msg {
+    color: var(--text-color);
+    margin-bottom: 5px;
+}
+
+.chat-input-container {
+    display: flex;
+    gap: 10px;
+}
+
+.chat-input-container input {
+    flex: 1;
+    padding: 5px;
+    background: #1e1b18;
+    border: 1px solid #444;
+    color: var(--text-color);
+}
+
+/* Mini Terminal Styles */
+.mini-terminal {
+    flex: 1;
+    border: 1px solid #444;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    background: #1e1b18;
+    overflow: hidden;
+    min-height: 200px;
+}
+
+.mini-terminal-header {
+    background: #333;
+    padding: 5px 10px;
+    font-size: 0.85em;
+    color: #ccc;
+    border-bottom: 1px solid #111;
+    text-align: center;
+    font-family: monospace;
+}
+
+.mini-terminal-output {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.9em;
+    color: #dccbb6;
+}
+
+.mini-terminal-output p {
+    margin: 2px 0;
+}
+
+.mini-terminal-input-line {
+    display: flex;
+    padding: 5px 10px 10px 10px;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.9em;
+    flex-shrink: 0;
+}
+
+.mini-terminal-input-line .prompt {
+    color: #8fbc8f;
+    margin-right: 8px;
+    white-space: nowrap;
+}
+
+#mini-terminal-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #dccbb6;
+    font-family: inherit;
+    font-size: inherit;
+    outline: none;
+}
+
+.flag-inventory {
+    border: 1px solid #444;
+    border-radius: 8px;
+    padding: 10px;
+    background: #2a2a2a;
+}
+
+.flag-inventory h3 {
+    margin-top: 0;
+    font-size: 1.2em;
+}
+
+#inventory-list {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 15px;
+}
+
+#inventory-list li {
+    background: #1e1b18;
+    padding: 5px 10px;
+    margin-bottom: 5px;
+    border-left: 3px solid var(--prompt-color);
+}
+
+.empty-inventory {
+    color: #888;
+    font-style: italic;
+    border-left: none !important;
+    background: transparent !important;
+}
+
+.inventory-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.inventory-actions input {
+    flex: 1;
+    padding: 5px;
+    background: #1e1b18;
+    border: 1px solid #444;
+    color: var(--text-color);
+}
+
+#combine-flag-btn {
+    width: 100%;
+    padding: 10px;
+    background: var(--prompt-color);
+    color: #000;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+#combine-flag-btn:disabled {
+    background: #555;
+    color: #888;
+    cursor: not-allowed;
+}
+
+.success-message {
+    padding: 20px;
+    border: 2px solid lime;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 1.2em;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.95);
+    z-index: 300;
+    /* Use flex directly in CSS to ensure it behaves when toggled */
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.success-message p {
+    margin: 5px 0;
+}
+

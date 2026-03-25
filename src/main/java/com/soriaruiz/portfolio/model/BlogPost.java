@@ -13,9 +13,18 @@ public class BlogPost {
     private LocalDate date;   // extracted from filename or file creation time
     private String excerpt;   // First paragraph
     private List<String> tags; // List of hashtags
+    private String type;      // "blog" or "proyects"
 
     public BlogPost() {
         this.tags = new ArrayList<>();
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public String getId() {

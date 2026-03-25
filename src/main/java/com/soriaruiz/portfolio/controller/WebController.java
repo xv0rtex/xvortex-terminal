@@ -38,27 +38,52 @@ public class WebController {
     public String blog(@RequestParam(required = false) String tag, Model model) {
         List<BlogPost> posts;
         if (tag != null && !tag.isEmpty()) {
-            posts = blogService.getPostsByTag(tag);
+            posts = blogService.getPostsByTypeAndTag("blog", tag);
             model.addAttribute("currentTag", tag);
         } else {
-            posts = blogService.getAllPosts();
+            posts = blogService.getPostsByType("blog");
         }
         
-        Set<String> allTags = blogService.getAllTags();
+        Set<String> allTags = blogService.getTagsByType("blog");
         
         model.addAttribute("posts", posts);
         model.addAttribute("tags", allTags);
+        model.addAttribute("pageTitle", "Blog");
+        model.addAttribute("pageCommand", "ls -l ./posts/blog");
+        model.addAttribute("pageType", "blog");
         return "blog";
     }
 
-    @GetMapping("/blog/{id}")
+    @GetMapping("/proyectos")
+    public String proyectos(@RequestParam(required = false) String tag, Model model) {
+        List<BlogPost> posts;
+        if (tag != null && !tag.isEmpty()) {
+            posts = blogService.getPostsByTypeAndTag("proyects", tag);
+            model.addAttribute("currentTag", tag);
+        } else {
+            posts = blogService.getPostsByType("proyects");
+        }
+        
+        Set<String> allTags = blogService.getTagsByType("proyects");
+        
+        model.addAttribute("posts", posts);
+        model.addAttribute("tags", allTags);
+        model.addAttribute("pageTitle", "Proyectos");
+        model.addAttribute("pageCommand", "ls -l ./posts/proyects");
+        model.addAttribute("pageType", "proyectos");
+        return "blog"; // Reusing the same template
+    }
+
+    @GetMapping({"/blog/{id}", "/proyectos/{id}"})
     public String blogPost(@PathVariable String id, Model model) {
         Optional<BlogPost> post = blogService.getPost(id);
         if (post.isPresent()) {
             model.addAttribute("post", post.get());
+            String type = post.get().getType();
+            model.addAttribute("backUrl", "proyects".equals(type) ? "/proyectos" : "/blog");
             return "post";
         }
-        return "redirect:/blog";
+        return "redirect:/";
     }
 
     @GetMapping("/services")

@@ -23,6 +23,12 @@ public class GroqService {
     @Value("${groq.system.prompt}")
     private String systemPrompt;
 
+    @Value("${groq.hack.system.prompt}")
+    private String hackSystemPrompt;
+
+    @Value("${groq.classification.prompt}")
+    private String classificationPrompt;
+
     private final WebClient webClient;
     private final BlogService blogService;
 
@@ -49,6 +55,10 @@ public class GroqService {
                 });
     }
 
+    public Mono<String> hackChat(String userMessage) {
+        return callGroqApi(hackSystemPrompt, userMessage);
+    }
+
     private Mono<Boolean> isBlogRelatedQuery(String userMessage) {
         // Simple keyword check first to save API calls
         String lowerMsg = userMessage.toLowerCase();
@@ -56,13 +66,9 @@ public class GroqService {
             return Mono.just(true);
         }
 
-        String classificationPrompt = "Eres un clasificador de intenciones. Tu única tarea es determinar si el mensaje del usuario está preguntando sobre 'posts', 'artículos', 'blog', 'escritos', 'publicaciones' o temas específicos tratados en ellos.\n" +
-                "Analiza el siguiente mensaje: \"" + userMessage + "\"\n" +
-                "Si el mensaje se refiere a consultar contenido del blog o posts, responde únicamente con la palabra 'BLOG'.\n" +
-                "Si el mensaje es un saludo, una pregunta sobre quién es Diego, sus servicios, o cualquier otro tema general, responde únicamente con la palabra 'GENERAL'.\n" +
-                "No expliques nada, solo responde 'BLOG' o 'GENERAL'.";
+        String fullClassificationPrompt = classificationPrompt.replace("{userMessage}", userMessage);
 
-        return callGroqApi(classificationPrompt, "Clasifica este mensaje: " + userMessage)
+        return callGroqApi(fullClassificationPrompt, "Clasifica este mensaje: " + userMessage)
                 .map(response -> response.trim().toUpperCase().contains("BLOG"))
                 .onErrorReturn(false); 
     }

@@ -1,34 +1,34 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments :: layout(~{::main})}">
 <head>
-    <title th:text="'dsr - Blog'">dsr - Blog</title>
+    <title th:text="'dsr - ' + ${pageTitle}">dsr - Blog</title>
 </head>
 <body>
     <main>
-        <h1>Blog</h1>
-        <p><span class="prompt">guest@dsr:~$</span> ls -l ./posts</p>
+        <h1 th:text="${pageTitle}">Blog</h1>
+        <p><span class="prompt">guest@dsr:~$</span> <span th:text="${pageCommand}">ls -l ./posts</span></p>
         
         <div th:if="${currentTag}" class="tag-filter">
             <p>Filtrando por etiqueta: <span class="tag" th:text="'#' + ${currentTag}"></span> 
-               <a th:href="@{/blog}" style="font-size: 0.8em; margin-left: 10px;">[limpiar]</a>
+               <a th:href="@{'/' + ${pageType}}" style="font-size: 0.8em; margin-left: 10px;">[limpiar]</a>
             </p>
         </div>
 
         <div class="tags-cloud" th:if="${tags != null and !tags.empty}">
             <span class="prompt">Etiquetas:</span>
             <span th:each="tag : ${tags}">
-                <a th:href="@{/blog(tag=${tag})}" th:text="'[' + ${tag} + ']'" 
+                <a th:href="@{'/' + ${pageType}(tag=${tag})}" th:text="'[' + ${tag} + ']'" 
                    th:class="${tag == currentTag ? 'active-tag' : ''}"></a>
             </span>
         </div>
         
         <div th:each="post : ${posts}" class="blog-post">
             <span class="meta" th:text="${#temporals.format(post.date, 'dd-MM-yyyy')}"></span>
-            <h2><a th:href="@{'/blog/' + ${post.id}}" th:text="${post.title}">Post Title</a></h2>
+            <h2><a th:href="@{'/' + ${pageType} + '/' + ${post.id}}" th:text="${post.title}">Post Title</a></h2>
             
             <div class="post-tags" th:if="${!post.tags.empty}">
                 <span th:each="tag : ${post.tags}">
-                    <a th:href="@{/blog(tag=${tag})}" th:text="'#' + ${tag}" class="small-tag"></a>
+                    <a th:href="@{'/' + ${pageType}(tag=${tag})}" th:text="'#' + ${tag}" class="small-tag"></a>
                 </span>
             </div>
 

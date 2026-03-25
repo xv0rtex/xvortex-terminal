@@ -13,7 +13,7 @@
             <div class="post-tags" th:if="${!post.tags.empty}">
                 <span class="prompt">Etiquetas:</span>
                 <span th:each="tag : ${post.tags}">
-                    <a th:href="@{/blog(tag=${tag})}" th:text="'#' + ${tag}"></a>
+                    <a th:href="@{${backUrl}(tag=${tag})}" th:text="'#' + ${tag}"></a>
                 </span>
             </div>
         </div>
@@ -23,7 +23,7 @@
         </article>
 
         <br>
-        <p><a th:href="@{/blog}">&lt;&lt; cd ..</a></p>
+        <p><a th:href="@{${backUrl}}">&lt;&lt; cd ..</a></p>
     </main>
 </body>
 </html>

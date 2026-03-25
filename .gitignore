@@ -31,3 +31,4 @@ logs/
 application-secret.properties
 src/main/resources/posts*
 form/*
+data/portfolio.mv.db

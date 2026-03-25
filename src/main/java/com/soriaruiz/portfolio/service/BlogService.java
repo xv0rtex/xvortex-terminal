@@ -62,11 +62,13 @@ public class BlogService {
     private void processFile(Path path) {
         try {
             String filename = path.getFileName().toString();
+            String type = path.getParent().getFileName().toString(); // e.g., "blog" or "proyects"
             String fileSlug = filename.replace(".md", "");
             String content = Files.readString(path);
 
             BlogPost post = new BlogPost();
             post.setRawContent(content);
+            post.setType(type);
             
             // Extract date from content "Date: dd-MM-yyyy"
             LocalDate date = extractDateFromContent(content);
@@ -92,7 +94,7 @@ public class BlogService {
                     .collect(Collectors.joining("\n"));
 
             // Process image paths - use fileSlug because images are stored in folder matching filename
-            contentWithoutTags = processImagePaths(contentWithoutTags, fileSlug);
+            contentWithoutTags = processImagePaths(contentWithoutTags, type + "/" + fileSlug);
 
             // Render Markdown to HTML
             Node document = parser.parse(contentWithoutTags);
@@ -220,8 +222,27 @@ public class BlogService {
                 .collect(Collectors.toList());
     }
 
+    public List<BlogPost> getPostsByType(String type) {
+        if (type == null || type.isEmpty()) return posts;
+        return posts.stream()
+                .filter(p -> type.equalsIgnoreCase(p.getType()))
+                .collect(Collectors.toList());
+    }
+
+    public List<BlogPost> getPostsByTypeAndTag(String type, String tag) {
+        return getPostsByType(type).stream()
+                .filter(p -> tag == null || tag.isEmpty() || p.getTags().stream().anyMatch(t -> t.equalsIgnoreCase(tag)))
+                .collect(Collectors.toList());
+    }
+
     public Set<String> getAllTags() {
         return posts.stream()
+                .flatMap(p -> p.getTags().stream())
+                .collect(Collectors.toSet());
+    }
+
+    public Set<String> getTagsByType(String type) {
+        return getPostsByType(type).stream()
                 .flatMap(p -> p.getTags().stream())
                 .collect(Collectors.toSet());
     }
