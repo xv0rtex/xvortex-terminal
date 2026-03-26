@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments :: layout(~{::main})}">
+<head>
+    <title>Error - dsr</title>
+</head>
+<body>
+    <main>
+        <h1>Error <span th:text="${status}">404</span></h1>
+        
+        <p><span class="prompt">guest@dsr:~$</span> cat /var/log/syslog | grep error</p>
+        <div class="response" style="color: var(--error-color, #cc6666); margin-bottom: 20px;">
+            [ERROR] <span th:text="${error}">Not Found</span>: <span th:text="${message}">The requested resource could not be found.</span><br>
+            [PATH] <span th:text="${path}">/unknown</span>
+        </div>
+        
+        <div><span class="prompt">guest@dsr:~$</span> ./recover.sh</div>
+        <div class="response" style="margin-top: 10px;">
+            <p>System recovery initiated...</p>
+            <p>Redirecting to safe zone...</p>
+            <br>
+            <a th:href="@{/}" style="background-color: #332f2c; padding: 5px 10px; border-left: 3px solid var(--prompt-color); color: var(--text-color); border-bottom: none; display: inline-block;">&gt; cd /home</a>
+        </div>
+    </main>
+</body>
+</html>
