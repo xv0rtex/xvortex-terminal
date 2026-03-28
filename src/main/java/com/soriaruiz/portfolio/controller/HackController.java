@@ -1,13 +1,16 @@
 package com.soriaruiz.portfolio.controller;
 
 import com.soriaruiz.portfolio.model.HackRanking;
+import com.soriaruiz.portfolio.model.groq.GroqRequest;
 import com.soriaruiz.portfolio.repository.HackRankingRepository;
 import com.soriaruiz.portfolio.service.GroqService;
 import com.soriaruiz.portfolio.service.LogService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -40,7 +43,25 @@ public class HackController {
 
         logService.logGroqRequest(ip, userAgent, "[HACK] " + message);
 
-        return groqService.hackChat(message)
+        HttpSession session = servletRequest.getSession();
+        @SuppressWarnings("unchecked")
+        List<GroqRequest.Message> history = (List<GroqRequest.Message>) session.getAttribute("hackChatHistory");
+        if (history == null) {
+            history = new ArrayList<>();
+        }
+
+        List<GroqRequest.Message> finalHistory = history;
+
+        return groqService.hackChat(message, finalHistory)
+                .doOnNext(response -> {
+                    finalHistory.add(new GroqRequest.Message("user", message));
+                    finalHistory.add(new GroqRequest.Message("assistant", response));
+                    // Keep the last 10 messages (5 pairs) to not exceed context length
+                    if (finalHistory.size() > 10) {
+                        finalHistory.subList(0, finalHistory.size() - 10).clear();
+                    }
+                    session.setAttribute("hackChatHistory", finalHistory);
+                })
                 .map(response -> Map.of("response", response));
     }
 

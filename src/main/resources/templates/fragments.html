@@ -32,6 +32,11 @@
     <div class="icon-label">Mini CTF</div>
 </div>
 
+<div class="desktop-icon" onclick="openActivityMonitor()" style="top: 240px;">
+    <div class="icon-img">📊</div>
+    <div class="icon-label">Activity</div>
+</div>
+
 <!-- Copyright Footer -->
 <div class="copyright">
     &copy; 2026 Diego Soria Ruiz. All rights reserved.
@@ -125,8 +130,13 @@
                         </div>
                     </div>
                     
-                    <div class="ctf-timer" id="timer-display">
-                        00:00.00
+                    <div class="ctf-controls" style="display: flex; flex-direction: column; gap: 8px;">
+                        <div class="ctf-timer" id="timer-display">
+                            00:00.00
+                        </div>
+                        <button onclick="endCTF()" style="background: #ff5f56; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; font-family: 'Fira Code', monospace; transition: background 0.2s;">
+                            Terminar CTF
+                        </button>
                     </div>
                 </div>
 
@@ -192,6 +202,63 @@
     </div>
 </div>
 
+<!-- Activity Monitor Window -->
+<div class="container closed" id="activity-window" style="z-index: 10;">
+    <div class="title-bar" id="activity-title-bar" onmousedown="bringToFront('activity-window')">
+        <div class="buttons">
+            <div class="button close" onclick="closeActivityMonitor()"></div>
+            <div class="button minimize" onclick="minimizeActivityMonitor()"></div>
+            <div class="button maximize" onclick="maximizeActivityMonitor()"></div>
+        </div>
+        <div class="window-title">Activity Monitor</div>
+    </div>
+    
+    <div class="terminal-content am-content" onmousedown="bringToFront('activity-window')">
+        <div class="activity-monitor-layout">
+            <!-- Header actions -->
+            <div class="am-header">
+                <input type="text" id="new-process-name" placeholder="Process name (e.g. coffee.service)" onkeypress="handleNewProcessKeyPress(event)">
+                <button onclick="startNewProcess()">Start Process</button>
+            </div>
+            
+            <!-- Process List -->
+            <div class="am-process-list">
+                <table id="process-table">
+                    <thead>
+                        <tr>
+                            <th onclick="sortProcesses('name')" style="cursor:pointer">Process Name ↕</th>
+                            <th onclick="sortProcesses('cpu')" style="cursor:pointer">% CPU ↕</th>
+                            <th onclick="sortProcesses('ram')" style="cursor:pointer">% Memory ↕</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="process-tbody">
+                        <!-- Filled by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Graphs -->
+            <div class="am-graphs">
+                <div class="am-graph-box">
+                    <h4>CPU History</h4>
+                    <div class="am-chart-container">
+                        <canvas id="cpu-canvas" width="300" height="100"></canvas>
+                    </div>
+                    <div class="am-graph-label" id="cpu-label">System: 0%</div>
+                </div>
+                <div class="am-graph-box">
+                    <h4>Memory History</h4>
+                    <div class="am-chart-container">
+                        <canvas id="ram-canvas" width="300" height="100"></canvas>
+                    </div>
+                    <div class="am-graph-label" id="ram-label">Used: 0%</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Dock -->
 <div class="dock" id="main-dock">
     <div class="dock-item active" id="dock-terminal" onclick="toggleTerminalFromDock()" title="Terminal">
@@ -200,20 +267,25 @@
     <div class="dock-item" id="dock-hack" onclick="toggleHackWindowFromDock()" title="Mini CTF">
         <div class="dock-icon">🏴‍☠️</div>
     </div>
+    <div class="dock-item" id="dock-activity" onclick="toggleActivityMonitorFromDock()" title="Activity Monitor">
+        <div class="dock-icon">📊</div>
+    </div>
 </div>
 
 <script>
     const terminal = document.getElementById("terminal-window");
     const hackWindow = document.getElementById("hack-window");
+    const activityWindow = document.getElementById("activity-window");
     const dockItemTerminal = document.getElementById("dock-terminal");
     const dockItemHack = document.getElementById("dock-hack");
+    const dockItemActivity = document.getElementById("dock-activity");
 
     let maxZIndex = 10;
 
-
     function bringToFront(windowId) {
         maxZIndex++;
-        document.getElementById(windowId).style.zIndex = maxZIndex;
+        const el = document.getElementById(windowId);
+        if (el) el.style.zIndex = maxZIndex;
     }
 
     // --- State Management ---
@@ -234,6 +306,14 @@
                 top: hackWindow.style.top,
                 left: hackWindow.style.left,
                 zIndex: hackWindow.style.zIndex
+            },
+            activity: {
+                minimized: activityWindow.classList.contains('minimized'),
+                maximized: activityWindow.classList.contains('maximized'),
+                closed: activityWindow.classList.contains('closed'),
+                top: activityWindow.style.top,
+                left: activityWindow.style.left,
+                zIndex: activityWindow.style.zIndex
             }
         };
         localStorage.setItem('windowsState', JSON.stringify(state));
@@ -244,6 +324,7 @@
         // Prevent animation on initial load
         terminal.style.transition = 'none';
         hackWindow.style.transition = 'none';
+        activityWindow.style.transition = 'none';
         
         if (saved) {
             const state = JSON.parse(saved);
@@ -293,21 +374,52 @@
                     dockItemHack.classList.remove('active');
                 }
             }
+            
+            // Activity State
+            if (state.activity) {
+                if (state.activity.top) activityWindow.style.top = state.activity.top;
+                if (state.activity.left) activityWindow.style.left = state.activity.left;
+                if (state.activity.zIndex) {
+                    activityWindow.style.zIndex = state.activity.zIndex;
+                    maxZIndex = Math.max(maxZIndex, parseInt(state.activity.zIndex) || 10);
+                }
+                
+                if (state.activity.minimized) {
+                    activityWindow.classList.add('minimized');
+                    dockItemActivity.classList.remove('active');
+                } else {
+                    if (!state.activity.closed) dockItemActivity.classList.add('active');
+                }
+
+                if (state.activity.maximized) activityWindow.classList.add('maximized');
+                if (state.activity.closed) {
+                    activityWindow.classList.add('closed');
+                    dockItemActivity.classList.remove('active');
+                }
+            } else {
+                activityWindow.classList.add('closed');
+                dockItemActivity.classList.remove('active');
+                centerWindow(activityWindow, 100, 100);
+            }
         } else {
             // Default state
             dockItemTerminal.classList.add('active');
             centerWindow(terminal);
             
-            // Hack window closed by default
             hackWindow.classList.add('closed');
             dockItemHack.classList.remove('active');
             centerWindow(hackWindow, 50, 50);
+            
+            activityWindow.classList.add('closed');
+            dockItemActivity.classList.remove('active');
+            centerWindow(activityWindow, 100, 100);
         }
 
         // Restore transition after a small delay
         setTimeout(() => {
             terminal.style.transition = '';
             hackWindow.style.transition = '';
+            activityWindow.style.transition = '';
         }, 50);
     }
     
@@ -352,16 +464,11 @@
     }
 
     function toggleTerminalFromDock() {
-        if (terminal.classList.contains('closed')) {
-            openTerminal();
-        } else if (terminal.classList.contains('minimized')) {
+        if (terminal.classList.contains('closed') || terminal.classList.contains('minimized')) {
             openTerminal();
         } else {
-            if (parseInt(terminal.style.zIndex) === maxZIndex) {
-                minimizeTerminal();
-            } else {
-                bringToFront('terminal-window');
-            }
+            if (parseInt(terminal.style.zIndex) === maxZIndex) minimizeTerminal();
+            else bringToFront('terminal-window');
         }
     }
 
@@ -393,22 +500,54 @@
     }
 
     function toggleHackWindowFromDock() {
-        if (hackWindow.classList.contains('closed')) {
-            openHackWindow();
-        } else if (hackWindow.classList.contains('minimized')) {
+        if (hackWindow.classList.contains('closed') || hackWindow.classList.contains('minimized')) {
             openHackWindow();
         } else {
-            if (parseInt(hackWindow.style.zIndex) === maxZIndex) {
-                minimizeHackWindow();
-            } else {
-                bringToFront('hack-window');
-            }
+            if (parseInt(hackWindow.style.zIndex) === maxZIndex) minimizeHackWindow();
+            else bringToFront('hack-window');
+        }
+    }
+
+    // --- Activity Monitor Actions ---
+    function minimizeActivityMonitor() {
+        activityWindow.classList.add('minimized');
+        dockItemActivity.classList.remove('active');
+        saveState();
+    }
+
+    function maximizeActivityMonitor() {
+        activityWindow.classList.toggle('maximized');
+        bringToFront('activity-window');
+        saveState();
+    }
+
+    function closeActivityMonitor() {
+        activityWindow.classList.add('closed');
+        dockItemActivity.classList.remove('active');
+        saveState();
+    }
+
+    function openActivityMonitor() {
+        activityWindow.classList.remove('closed');
+        activityWindow.classList.remove('minimized');
+        dockItemActivity.classList.add('active');
+        bringToFront('activity-window');
+        saveState();
+    }
+
+    function toggleActivityMonitorFromDock() {
+        if (activityWindow.classList.contains('closed') || activityWindow.classList.contains('minimized')) {
+            openActivityMonitor();
+        } else {
+            if (parseInt(activityWindow.style.zIndex) === maxZIndex) minimizeActivityMonitor();
+            else bringToFront('activity-window');
         }
     }
 
     // --- Drag Logic ---
     dragElement(terminal, "title-bar");
     dragElement(hackWindow, "hack-title-bar");
+    dragElement(activityWindow, "activity-title-bar");
 
     function dragElement(elmnt, titleBarId) {
         var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
@@ -467,6 +606,7 @@
 </script>
 <script th:src="@{/js/terminal.js(v=${#dates.createNow().time})}"></script>
 <script th:src="@{/js/hack.js(v=${#dates.createNow().time})}"></script>
+<script th:src="@{/js/activity-monitor.js(v=${#dates.createNow().time})}"></script>
 
 </body>
 </html>

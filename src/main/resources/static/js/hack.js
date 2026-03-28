@@ -664,3 +664,9 @@ function resetHack() {
     navigateBrowser('http://target.local/');
     fetchAndRenderLeaderboard('start-leaderboard-list');
 }
+
+function endCTF() {
+    if (confirm("¿Estás seguro de que quieres terminar el CTF? Se perderá todo tu progreso.")) {
+        resetHack();
+    }
+}
