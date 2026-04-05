@@ -434,14 +434,14 @@
     function centerWindow(win, offsetLeft = 0, offsetTop = 0) {
         const winW = window.innerWidth;
         const winH = window.innerHeight;
-        const width = win.offsetWidth || Math.min(800, winW * 0.9);
+        const width  = win.offsetWidth  || Math.min(800, winW * 0.9);
         const height = win.offsetHeight || (winH * 0.8);
-        
-        const left = (winW - width) / 2 + offsetLeft;
-        const top = (winH - height) / 2 + offsetTop;
-        
-        win.style.left = left + "px";
-        win.style.top = top + "px";
+
+        const left = (winW - width)  / 2 + offsetLeft;
+        const top  = (winH - height) / 2 + offsetTop;
+
+        win.style.left = Math.max(0, left) + "px";
+        win.style.top  = Math.max(0, top)  + "px";
     }
 
     // --- Terminal Actions ---
@@ -589,11 +589,17 @@
             pos2 = pos4 - e.clientY;
             pos3 = e.clientX;
             pos4 = e.clientY;
-            
-            let newTop = elmnt.offsetTop - pos2;
+
+            let newTop  = elmnt.offsetTop  - pos2;
             let newLeft = elmnt.offsetLeft - pos1;
-            
-            elmnt.style.top = newTop + "px";
+
+            // Keep title bar inside the viewport
+            const titleBarH = 40;
+            const minVisible = 100; // px of window that must remain on screen horizontally
+            newTop  = Math.max(0, Math.min(window.innerHeight - titleBarH, newTop));
+            newLeft = Math.max(-(elmnt.offsetWidth - minVisible), Math.min(window.innerWidth - minVisible, newLeft));
+
+            elmnt.style.top  = newTop  + "px";
             elmnt.style.left = newLeft + "px";
         }
 
