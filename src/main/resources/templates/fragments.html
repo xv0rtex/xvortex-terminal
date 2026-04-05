@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>dsr</title>
     <link rel="icon" type="image/png" th:href="@{/favicon.png}">
-    <link rel="stylesheet" th:href="@{/css/style.css(v=2)}">
+    <link rel="stylesheet" th:href="@{/css/style.css(v=3)}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -227,9 +227,9 @@
                 <table id="process-table">
                     <thead>
                         <tr>
-                            <th onclick="sortProcesses('name')" style="cursor:pointer">Process Name ↕</th>
-                            <th onclick="sortProcesses('cpu')" style="cursor:pointer">% CPU ↕</th>
-                            <th onclick="sortProcesses('ram')" style="cursor:pointer">% Memory ↕</th>
+                            <th id="sort-name" onclick="sortProcesses('name')" style="cursor:pointer">Process Name ↕</th>
+                            <th id="sort-cpu" onclick="sortProcesses('cpu')" style="cursor:pointer">% CPU ↓</th>
+                            <th id="sort-ram" onclick="sortProcesses('ram')" style="cursor:pointer">% Memory ↕</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -242,19 +242,26 @@
             <!-- Graphs -->
             <div class="am-graphs">
                 <div class="am-graph-box">
-                    <h4>CPU History</h4>
+                    <h4>CPU <span class="am-badge" id="cpu-badge">0.0%</span></h4>
                     <div class="am-chart-container">
-                        <canvas id="cpu-canvas" width="300" height="100"></canvas>
+                        <canvas id="cpu-canvas"></canvas>
                     </div>
-                    <div class="am-graph-label" id="cpu-label">System: 0%</div>
+                    <div class="am-graph-label" id="cpu-label">30s history</div>
                 </div>
                 <div class="am-graph-box">
-                    <h4>Memory History</h4>
+                    <h4>Memory <span class="am-badge" id="ram-badge">0.0%</span></h4>
                     <div class="am-chart-container">
-                        <canvas id="ram-canvas" width="300" height="100"></canvas>
+                        <canvas id="ram-canvas"></canvas>
                     </div>
-                    <div class="am-graph-label" id="ram-label">Used: 0%</div>
+                    <div class="am-graph-label" id="ram-label">30s history</div>
                 </div>
+            </div>
+
+            <!-- Status Bar -->
+            <div class="am-status-bar">
+                <span id="am-proc-count">— processes</span>
+                <span id="am-cpu-avg">CPU avg: —</span>
+                <span id="am-ram-avg">RAM avg: —</span>
             </div>
         </div>
     </div>
@@ -607,7 +614,7 @@
 </script>
 <script th:src="@{/js/terminal.js(v=2)}"></script>
 <script th:src="@{/js/hack.js(v=2)}"></script>
-<script th:src="@{/js/activity-monitor.js(v=2)}"></script>
+<script th:src="@{/js/activity-monitor.js(v=3)}"></script>
 
 </body>
 </html>

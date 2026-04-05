@@ -920,7 +920,7 @@ pre::-webkit-scrollbar {
     flex-direction: column;
     height: 100%;
     color: #e0e0e0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: 'Fira Code', monospace;
 }
 
 .am-header {
@@ -939,6 +939,8 @@ pre::-webkit-scrollbar {
     background: #3d3d3d;
     color: white;
     outline: none;
+    font-family: 'Fira Code', monospace;
+    font-size: 12px;
 }
 
 .am-header input:focus {
@@ -953,6 +955,8 @@ pre::-webkit-scrollbar {
     border-radius: 6px;
     cursor: pointer;
     font-weight: 500;
+    font-family: 'Fira Code', monospace;
+    font-size: 12px;
 }
 
 .am-header button:hover {
@@ -968,19 +972,23 @@ pre::-webkit-scrollbar {
 #process-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 13px;
+    font-size: 12px;
+    font-family: 'Fira Code', monospace;
 }
 
 #process-table th {
     text-align: left;
     padding: 8px 15px;
     background: #252525;
-    color: #999;
+    color: #888;
     border-bottom: 1px solid #333;
     border-right: 1px solid #333;
     position: sticky;
     top: 0;
     z-index: 1;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    user-select: none;
 }
 
 #process-table th:last-child {
@@ -988,18 +996,18 @@ pre::-webkit-scrollbar {
 }
 
 #process-table td {
-    padding: 6px 15px;
-    border-bottom: 1px solid #2a2a2a;
+    padding: 5px 15px;
+    border-bottom: 1px solid #252525;
     color: #ddd;
+    vertical-align: middle;
 }
 
 #process-table tr:nth-child(even) {
-    background-color: #232323;
+    background-color: #212121;
 }
 
 #process-table tr:hover {
-    background-color: #0a84ff;
-    color: white;
+    background-color: rgba(10, 132, 255, 0.15);
 }
 
 #process-table tr:hover td {
@@ -1012,13 +1020,15 @@ pre::-webkit-scrollbar {
     border: 1px solid #ff453a;
     border-radius: 4px;
     padding: 2px 8px;
-    font-size: 11px;
+    font-size: 10px;
     cursor: pointer;
+    font-family: 'Fira Code', monospace;
+    transition: background 0.15s, color 0.15s;
 }
 
 #process-table tr:hover .kill-btn {
-    color: white;
-    border-color: white;
+    color: #ff453a;
+    border-color: #ff453a;
 }
 
 .kill-btn:hover {
@@ -1026,52 +1036,108 @@ pre::-webkit-scrollbar {
     color: white !important;
 }
 
-.am-graphs {
-    height: 160px;
-    background: #252525;
-    border-top: 1px solid #444;
+/* Usage cell with mini bar */
+.usage-cell {
     display: flex;
-    padding: 15px;
-    gap: 20px;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 70px;
+}
+
+.usage-bar {
+    height: 2px;
+    background: #333;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.usage-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.8s ease;
+}
+
+.am-graphs {
+    height: 170px;
+    background: #1a1a1a;
+    border-top: 1px solid #333;
+    display: flex;
+    padding: 12px;
+    gap: 12px;
 }
 
 .am-graph-box {
     flex: 1;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    background: #1e1e1e;
-    border: 1px solid #333;
+    background: #222;
+    border: 1px solid #2e2e2e;
     border-radius: 8px;
-    padding: 10px;
+    padding: 10px 10px 8px;
+    overflow: hidden;
 }
 
 .am-graph-box h4 {
-    margin: 0 0 10px 0;
-    font-size: 12px;
-    color: #999;
-    letter-spacing: normal;
-    text-transform: none;
+    margin: 0 0 6px 0;
+    font-size: 11px;
+    color: #777;
+    font-family: 'Fira Code', monospace;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
+
+.am-badge {
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+    background: #30d158;
+    color: #000;
+    transition: background 0.4s, color 0.4s;
+}
+
+.am-badge.yellow { background: #ffd60a; color: #000; }
+.am-badge.red    { background: #ff453a; color: #fff; }
 
 .am-chart-container {
     flex: 1;
     width: 100%;
     position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    overflow: hidden;
 }
 
 .am-chart-container canvas {
-    max-width: 100%;
-    max-height: 100%;
+    display: block;
+    width: 100%;
+    height: 100%;
 }
 
 .am-graph-label {
-    margin-top: 5px;
-    font-size: 14px;
-    font-weight: 500;
-    color: #fff;
+    margin-top: 4px;
+    font-size: 10px;
+    font-family: 'Fira Code', monospace;
+    color: #555;
+}
+
+/* Status bar */
+.am-status-bar {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 5px 15px;
+    background: #1a1a1a;
+    border-top: 1px solid #2a2a2a;
+    font-size: 10px;
+    font-family: 'Fira Code', monospace;
+    color: #555;
+    flex-shrink: 0;
+}
+
+.am-status-bar span {
+    color: #666;
 }
 
