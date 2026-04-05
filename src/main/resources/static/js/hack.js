@@ -41,10 +41,9 @@ const pages = {
     `
 };
 
-const validFragmentsList = ['CTF{h1dd3n_', 'c00k135_', 'pr0mpt_1ny3ct10n_', '3x1f_d4t4}'];
 let inventory = JSON.parse(localStorage.getItem('hackInventory')) || [];
-// Clean up old/invalid flags from previous versions
-inventory = inventory.filter(f => validFragmentsList.includes(f));
+// Clean up malformed entries from previous versions
+inventory = inventory.filter(item => item && typeof item.fragment === 'string' && typeof item.index === 'number');
 localStorage.setItem('hackInventory', JSON.stringify(inventory));
 const TOTAL_FRAGMENTS = 4;
 let devToolsOpen = false;
@@ -462,7 +461,7 @@ function processMiniTerminalCommand(cmdString) {
 }
 
 // --- Flag Inventory Logic ---
-function addManualFlag() {
+async function addManualFlag() {
     const input = document.getElementById('manual-flag-input');
     let flag = input.value.trim();
     if (!flag) return;
@@ -471,29 +470,45 @@ function addManualFlag() {
         flag = flag.split(':')[1].trim();
     }
 
-    if (inventory.includes(flag)) {
+    if (inventory.some(item => item.fragment === flag)) {
         alert('You already have this fragment!');
         return;
     }
 
-    if (!validFragmentsList.includes(flag)) {
-        alert('That does not look like a valid flag fragment.');
-        return;
-    }
+    try {
+        const response = await fetch('/api/hack/validate-flag', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fragment: flag })
+        });
 
-    inventory.push(flag);
-    localStorage.setItem('hackInventory', JSON.stringify(inventory));
-    input.value = '';
-    renderInventory();
-    checkWinCondition();
+        if (!response.ok) {
+            alert('That does not look like a valid flag fragment.');
+            return;
+        }
+
+        const data = await response.json();
+        if (!data.valid) {
+            alert('That does not look like a valid flag fragment.');
+            return;
+        }
+
+        inventory.push({ fragment: flag, index: data.index });
+        localStorage.setItem('hackInventory', JSON.stringify(inventory));
+        input.value = '';
+        renderInventory();
+        checkWinCondition();
+    } catch (e) {
+        alert('Error connecting to server. Try again.');
+    }
 }
 
 function renderInventory() {
     for (let i = 1; i <= TOTAL_FRAGMENTS; i++) {
         const slot = document.getElementById('slot-' + i);
-        const expectedPart = validFragmentsList[i-1];
-        if (inventory.includes(expectedPart)) {
-            slot.textContent = expectedPart;
+        const found = inventory.find(item => item.index === i - 1);
+        if (found) {
+            slot.textContent = found.fragment;
             slot.classList.add('filled');
         } else {
             slot.textContent = '?';
@@ -504,15 +519,13 @@ function renderInventory() {
 
 function checkWinCondition() {
     if (inventory.length === TOTAL_FRAGMENTS) {
-        // Find them to order them correctly
-        let part1 = inventory.find(f => f === validFragmentsList[0]);
-        let part2 = inventory.find(f => f === validFragmentsList[1]);
-        let part3 = inventory.find(f => f === validFragmentsList[2]);
-        let part4 = inventory.find(f => f === validFragmentsList[3]);
+        const allIndicesFound = [0, 1, 2, 3].every(i => inventory.some(item => item.index === i));
 
-        if (part1 && part2 && part3 && part4) {
+        if (allIndicesFound) {
             stopTimer();
-            const finalFlag = part1 + part2 + part3 + part4;
+            const finalFlag = [0, 1, 2, 3]
+                .map(i => inventory.find(item => item.index === i).fragment)
+                .join('');
             
             // Wait a tiny bit for UI to update slot colors before showing success
             setTimeout(() => {

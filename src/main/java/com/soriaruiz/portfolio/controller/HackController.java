@@ -18,6 +18,16 @@ import java.util.Map;
 @RequestMapping("/api/hack")
 public class HackController {
 
+    private static final String[] CTF_FRAGMENTS = {
+        "CTF{h1dd3n_",
+        "c00k135_",
+        "pr0mpt_1ny3ct10n_",
+        "3x1f_d4t4}"
+    };
+
+    private static final long MIN_TIME_MS = 10_000; // 10 seconds minimum
+    private static final int MAX_NICKNAME_LENGTH = 30;
+
     private final GroqService groqService;
     private final LogService logService;
     private final HackRankingRepository hackRankingRepository;
@@ -65,6 +75,21 @@ public class HackController {
                 .map(response -> Map.of("response", response));
     }
 
+    @PostMapping("/validate-flag")
+    public Mono<Map<String, Object>> validateFlag(@RequestBody Map<String, String> payload) {
+        String fragment = payload.get("fragment");
+        if (fragment == null || fragment.isBlank()) {
+            return Mono.just(Map.of("valid", false));
+        }
+        String trimmed = fragment.trim();
+        for (int i = 0; i < CTF_FRAGMENTS.length; i++) {
+            if (CTF_FRAGMENTS[i].equals(trimmed)) {
+                return Mono.just(Map.of("valid", true, "index", i));
+            }
+        }
+        return Mono.just(Map.of("valid", false));
+    }
+
     @PostMapping("/ranking")
     public Mono<HackRanking> submitRanking(@RequestBody Map<String, Object> payload) {
         String nickname = (String) payload.get("nickname");
@@ -72,8 +97,17 @@ public class HackController {
         if (nickname == null || timeMsObj == null) {
             return Mono.error(new IllegalArgumentException("Invalid payload"));
         }
-        
-        HackRanking ranking = new HackRanking(nickname, timeMsObj.longValue());
+
+        long timeMs = timeMsObj.longValue();
+        if (timeMs < MIN_TIME_MS) {
+            return Mono.error(new IllegalArgumentException("Invalid time"));
+        }
+
+        nickname = nickname.trim();
+        if (nickname.isEmpty()) nickname = "Anonymous Hacker";
+        if (nickname.length() > MAX_NICKNAME_LENGTH) nickname = nickname.substring(0, MAX_NICKNAME_LENGTH);
+
+        HackRanking ranking = new HackRanking(nickname, timeMs);
         return Mono.just(hackRankingRepository.save(ranking));
     }
 

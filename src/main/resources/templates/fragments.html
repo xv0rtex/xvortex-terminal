@@ -2,9 +2,10 @@
 <html xmlns:th="http://www.thymeleaf.org" th:fragment="layout(content)">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>dsr</title>
     <link rel="icon" type="image/png" th:href="@{/favicon.png}">
-    <link rel="stylesheet" th:href="@{/css/style.css(v=${#dates.createNow().time})}">
+    <link rel="stylesheet" th:href="@{/css/style.css(v=2)}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -604,9 +605,9 @@
     }
 
 </script>
-<script th:src="@{/js/terminal.js(v=${#dates.createNow().time})}"></script>
-<script th:src="@{/js/hack.js(v=${#dates.createNow().time})}"></script>
-<script th:src="@{/js/activity-monitor.js(v=${#dates.createNow().time})}"></script>
+<script th:src="@{/js/terminal.js(v=2)}"></script>
+<script th:src="@{/js/hack.js(v=2)}"></script>
+<script th:src="@{/js/activity-monitor.js(v=2)}"></script>
 
 </body>
 </html>
