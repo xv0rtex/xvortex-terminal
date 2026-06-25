@@ -206,9 +206,24 @@ public class BlogService {
     }
 
     private String processImagePaths(String content, String slug) {
-        // Replace typical markdown image syntax ![alt](image.jpg) with ![alt](/posts/slug/image.jpg)
-        // Only if the path doesn't start with http/https/slash
-        return content.replaceAll("!\\[(.*?)\\]\\((?!http|/)(.*?)\\)", "![$1](/posts/" + slug + "/$2)");
+        // First: turn ![alt](file.mp4|webm|mov) into an HTML <video> block.
+        // Covers both relative and absolute/external URLs.
+        Pattern videoPattern = Pattern.compile("!\\[(.*?)\\]\\(([^)\\s]+?\\.(?:mp4|webm|mov))\\)", Pattern.CASE_INSENSITIVE);
+        Matcher videoMatcher = videoPattern.matcher(content);
+        StringBuffer sb = new StringBuffer();
+        while (videoMatcher.find()) {
+            String src = videoMatcher.group(2);
+            if (!src.startsWith("http") && !src.startsWith("/")) {
+                src = "/posts/" + slug + "/" + src;
+            }
+            String replacement = "\n<video controls preload=\"metadata\" src=\"" + src + "\"></video>\n";
+            videoMatcher.appendReplacement(sb, Matcher.quoteReplacement(replacement));
+        }
+        videoMatcher.appendTail(sb);
+        String result = sb.toString();
+
+        // Then: rewrite remaining relative image paths to /posts/slug/...
+        return result.replaceAll("!\\[(.*?)\\]\\((?!http|/)(.*?)\\)", "![$1](/posts/" + slug + "/$2)");
     }
 
     public List<BlogPost> getAllPosts() {

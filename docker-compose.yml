@@ -9,6 +9,7 @@ services:
     volumes:
       - .:/home/soriaruiz
       - /home/data/post:/home/soriaruiz/src/main/resources/posts
+      - /home/data/eventos:/home/soriaruiz/src/main/resources/eventos
       - /home/data/form:/home/soriaruiz/form
       - /home/data/logs:/home/soriaruiz/logs
     restart: unless-stopped

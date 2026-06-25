@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>dsr</title>
     <link rel="icon" type="image/png" th:href="@{/favicon.png}">
-    <link rel="stylesheet" th:href="@{/css/style.css(v=3)}">
+    <link rel="stylesheet" th:href="@{/css/style.css(v=10)}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -36,6 +36,11 @@
 <div class="desktop-icon" onclick="openActivityMonitor()" style="top: 240px;">
     <div class="icon-img">📊</div>
     <div class="icon-label">Activity</div>
+</div>
+
+<div class="desktop-icon" onclick="openEvents()" style="top: 350px;">
+    <div class="icon-img">📅</div>
+    <div class="icon-label">Events</div>
 </div>
 
 <!-- Copyright Footer -->
@@ -267,6 +272,24 @@
     </div>
 </div>
 
+<!-- Events Window -->
+<div class="container closed" id="events-window" style="z-index: 10;">
+    <div class="title-bar" id="events-title-bar" onmousedown="bringToFront('events-window')">
+        <div class="buttons">
+            <div class="button close" onclick="closeEvents()"></div>
+            <div class="button minimize" onclick="minimizeEvents()"></div>
+            <div class="button maximize" onclick="maximizeEvents()"></div>
+        </div>
+        <div class="window-title">Events</div>
+    </div>
+
+    <div class="terminal-content events-content" id="events-content" onmousedown="bringToFront('events-window')">
+        <div class="events-grid" id="events-grid">
+            <p class="events-loading">Loading events...</p>
+        </div>
+    </div>
+</div>
+
 <!-- Dock -->
 <div class="dock" id="main-dock">
     <div class="dock-item active" id="dock-terminal" onclick="toggleTerminalFromDock()" title="Terminal">
@@ -278,15 +301,20 @@
     <div class="dock-item" id="dock-activity" onclick="toggleActivityMonitorFromDock()" title="Activity Monitor">
         <div class="dock-icon">📊</div>
     </div>
+    <div class="dock-item" id="dock-events" onclick="toggleEventsFromDock()" title="Events">
+        <div class="dock-icon">📅</div>
+    </div>
 </div>
 
 <script>
     const terminal = document.getElementById("terminal-window");
     const hackWindow = document.getElementById("hack-window");
     const activityWindow = document.getElementById("activity-window");
+    const eventsWindow = document.getElementById("events-window");
     const dockItemTerminal = document.getElementById("dock-terminal");
     const dockItemHack = document.getElementById("dock-hack");
     const dockItemActivity = document.getElementById("dock-activity");
+    const dockItemEvents = document.getElementById("dock-events");
 
     let maxZIndex = 10;
 
@@ -322,6 +350,14 @@
                 top: activityWindow.style.top,
                 left: activityWindow.style.left,
                 zIndex: activityWindow.style.zIndex
+            },
+            events: {
+                minimized: eventsWindow.classList.contains('minimized'),
+                maximized: eventsWindow.classList.contains('maximized'),
+                closed: eventsWindow.classList.contains('closed'),
+                top: eventsWindow.style.top,
+                left: eventsWindow.style.left,
+                zIndex: eventsWindow.style.zIndex
             }
         };
         localStorage.setItem('windowsState', JSON.stringify(state));
@@ -333,6 +369,7 @@
         terminal.style.transition = 'none';
         hackWindow.style.transition = 'none';
         activityWindow.style.transition = 'none';
+        eventsWindow.style.transition = 'none';
         
         if (saved) {
             const state = JSON.parse(saved);
@@ -409,18 +446,49 @@
                 dockItemActivity.classList.remove('active');
                 centerWindow(activityWindow, 100, 100);
             }
+
+            // Events State
+            if (state.events) {
+                if (state.events.top) eventsWindow.style.top = state.events.top;
+                if (state.events.left) eventsWindow.style.left = state.events.left;
+                if (state.events.zIndex) {
+                    eventsWindow.style.zIndex = state.events.zIndex;
+                    maxZIndex = Math.max(maxZIndex, parseInt(state.events.zIndex) || 10);
+                }
+
+                if (state.events.minimized) {
+                    eventsWindow.classList.add('minimized');
+                    dockItemEvents.classList.remove('active');
+                } else {
+                    if (!state.events.closed) dockItemEvents.classList.add('active');
+                }
+
+                if (state.events.maximized) eventsWindow.classList.add('maximized');
+                if (state.events.closed) {
+                    eventsWindow.classList.add('closed');
+                    dockItemEvents.classList.remove('active');
+                }
+            } else {
+                eventsWindow.classList.add('closed');
+                dockItemEvents.classList.remove('active');
+                centerWindow(eventsWindow, 150, 150);
+            }
         } else {
             // Default state
             dockItemTerminal.classList.add('active');
             centerWindow(terminal);
-            
+
             hackWindow.classList.add('closed');
             dockItemHack.classList.remove('active');
             centerWindow(hackWindow, 50, 50);
-            
+
             activityWindow.classList.add('closed');
             dockItemActivity.classList.remove('active');
             centerWindow(activityWindow, 100, 100);
+
+            eventsWindow.classList.add('closed');
+            dockItemEvents.classList.remove('active');
+            centerWindow(eventsWindow, 150, 150);
         }
 
         // Restore transition after a small delay
@@ -428,6 +496,7 @@
             terminal.style.transition = '';
             hackWindow.style.transition = '';
             activityWindow.style.transition = '';
+            eventsWindow.style.transition = '';
         }, 50);
     }
     
@@ -552,10 +621,60 @@
         }
     }
 
+    // --- Events Window Actions ---
+    function minimizeEvents() {
+        eventsWindow.classList.add('minimized');
+        dockItemEvents.classList.remove('active');
+        saveState();
+    }
+
+    function maximizeEvents() {
+        eventsWindow.classList.toggle('maximized');
+        bringToFront('events-window');
+        saveState();
+    }
+
+    function closeEvents() {
+        eventsWindow.classList.add('closed');
+        dockItemEvents.classList.remove('active');
+        saveState();
+    }
+
+    function openEvents() {
+        eventsWindow.classList.remove('closed');
+        eventsWindow.classList.remove('minimized');
+        dockItemEvents.classList.add('active');
+        bringToFront('events-window');
+        saveState();
+    }
+
+    function toggleEventsFromDock() {
+        if (eventsWindow.classList.contains('closed') || eventsWindow.classList.contains('minimized')) {
+            openEvents();
+        } else {
+            if (parseInt(eventsWindow.style.zIndex) === maxZIndex) minimizeEvents();
+            else bringToFront('events-window');
+        }
+    }
+
+    // --- Ensure Terminal Open (called before navigating to a post) ---
+    function ensureTerminalOpen() {
+        const saved = localStorage.getItem('windowsState');
+        if (saved) {
+            const state = JSON.parse(saved);
+            if (state.terminal) {
+                state.terminal.closed = false;
+                state.terminal.minimized = false;
+            }
+            localStorage.setItem('windowsState', JSON.stringify(state));
+        }
+    }
+
     // --- Drag Logic ---
     dragElement(terminal, "title-bar");
     dragElement(hackWindow, "hack-title-bar");
     dragElement(activityWindow, "activity-title-bar");
+    dragElement(eventsWindow, "events-title-bar");
 
     function dragElement(elmnt, titleBarId) {
         var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
@@ -621,6 +740,7 @@
 <script th:src="@{/js/terminal.js(v=2)}"></script>
 <script th:src="@{/js/hack.js(v=2)}"></script>
 <script th:src="@{/js/activity-monitor.js(v=3)}"></script>
+<script th:src="@{/js/events.js(v=2)}"></script>
 
 </body>
 </html>

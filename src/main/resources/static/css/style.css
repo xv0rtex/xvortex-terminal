@@ -130,6 +130,7 @@ a:hover {
     overflow-y: auto;
     overflow-x: hidden; /* Prevent horizontal scroll */
     flex-grow: 1;
+    container-type: size;
 }
 
 /* Removed old scrollbar styles */
@@ -382,6 +383,24 @@ img {
     border-radius: 4px;
     display: block;
     margin: 20px 0;
+}
+
+article img,
+article video {
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: 95cqw;
+    max-height: 70cqh;
+    margin: 20px auto;
+    border: 1px solid #444;
+    border-radius: 4px;
+    object-fit: contain;
+    box-sizing: border-box;
+}
+
+article video {
+    background: #000;
 }
 
 /* Ensure text wraps correctly */
@@ -1139,5 +1158,574 @@ pre::-webkit-scrollbar {
 
 .am-status-bar span {
     color: #666;
+}
+
+/* ===== Events Window ===== */
+
+.events-content {
+    padding: 20px !important;
+}
+
+.events-header {
+    margin-bottom: 18px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #333;
+    flex-shrink: 0;
+}
+
+.events-header h2 {
+    margin: 0 0 4px 0;
+    font-size: 1.1em;
+    color: var(--prompt-color);
+    font-weight: 600;
+}
+
+.events-header .events-count {
+    font-size: 0.8em;
+    color: #666;
+}
+
+/* Horizontal timeline */
+.events-content {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden !important;
+}
+
+.events-grid {
+    position: relative;
+    overflow-x: auto;
+    overflow-y: hidden;
+    flex: 1;
+    min-height: 0;
+    scrollbar-width: thin;
+    scrollbar-color: #333 transparent;
+}
+
+.events-grid::-webkit-scrollbar {
+    height: 8px;
+}
+
+.events-grid::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.events-grid::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 4px;
+}
+
+.events-grid::-webkit-scrollbar-thumb:hover {
+    background: var(--prompt-color);
+}
+
+.timeline-items {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 28px;
+    padding: 10px 20px 20px;
+    position: relative;
+    min-height: 100%;
+    box-sizing: border-box;
+}
+
+/* Track element is unused now: the rail is drawn per-node so it always lines up
+   with the dot regardless of card height or vertical centering. */
+.timeline-track {
+    display: none;
+}
+
+.timeline-item {
+    flex: 0 0 260px;
+    width: 260px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    position: relative;
+}
+
+.timeline-item .event-card {
+    width: 100%;
+    height: 400px;
+}
+
+.timeline-node {
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin-top: 10px;
+}
+
+/* Horizontal rail: each node draws its own segment that extends into the
+   surrounding gap (gap/2 = 14px) so segments meet seamlessly between dots. */
+.timeline-node::before {
+    content: '';
+    position: absolute;
+    left: -14px;
+    right: -14px;
+    top: 50%;
+    height: 2px;
+    background: #333;
+    transform: translateY(-1px);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.timeline-item:first-child .timeline-node::before {
+    left: 50%;
+    background: linear-gradient(to right, transparent 0, #333 20px);
+}
+
+.timeline-item:last-child .timeline-node::before {
+    right: 50%;
+    background: linear-gradient(to right, #333 0, #333 calc(100% - 20px), transparent 100%);
+}
+
+.timeline-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--prompt-color);
+    box-shadow: 0 0 0 3px #0e0d0c, 0 0 10px rgba(143, 188, 143, 0.6);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+    z-index: 1;
+}
+
+.timeline-item:hover .timeline-dot {
+    transform: scale(1.3);
+    box-shadow: 0 0 0 3px #0e0d0c, 0 0 14px rgba(143, 188, 143, 0.9);
+}
+
+.timeline-date {
+    text-align: center;
+    font-size: 0.78em;
+    color: #888;
+    margin-top: 8px;
+    font-family: var(--font-family);
+    letter-spacing: 0.03em;
+}
+
+/* Card entrance animation */
+@keyframes eventCardIn {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes termCursorBlink {
+    0%, 49% { opacity: 1; }
+    50%, 100% { opacity: 0; }
+}
+
+/* ── Rounded card ── */
+.event-card {
+    background: #0e0d0c;
+    border: 1px solid #2a2a2a;
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    animation: eventCardIn 0.4s ease both;
+    cursor: default;
+}
+
+/* Subtle scan-line overlay */
+.event-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+        to bottom,
+        rgba(143, 188, 143, 0.015) 0,
+        rgba(143, 188, 143, 0.015) 1px,
+        transparent 1px,
+        transparent 3px
+    );
+    pointer-events: none;
+    z-index: 2;
+}
+
+.event-card[data-tag]:not([data-tag=""]) {
+    cursor: pointer;
+}
+
+.event-card:hover {
+    border-color: var(--prompt-color);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5), 0 0 20px rgba(143, 188, 143, 0.12);
+}
+
+.event-card-img {
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    background: #0e0d0c;
+    overflow: hidden;
+    position: relative;
+    border-bottom: 1px solid #1f1f1f;
+    margin: 0;
+    padding: 0;
+}
+
+.event-card-name {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 10px 12px;
+    font-size: 0.82em;
+    font-weight: 600;
+    color: #fff;
+    background: linear-gradient(rgba(0, 0, 0, 0.7), transparent);
+    z-index: 3;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+    letter-spacing: 0.02em;
+}
+
+.event-card-img::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(transparent 80%, rgba(14, 13, 12, 0.4));
+    pointer-events: none;
+}
+
+.event-card-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    filter: saturate(0.85) contrast(1.05);
+    transition: transform 0.5s ease, filter 0.3s ease;
+    vertical-align: top;
+}
+
+.event-card:hover .event-card-img img {
+    transform: scale(1.04);
+    filter: saturate(1) contrast(1.1);
+}
+
+.event-card-img-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.2em;
+    color: #444;
+    background: linear-gradient(135deg, #0e0d0c, #1a1816);
+}
+
+/* Terminal-style text lines */
+.event-term-lines {
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex: 1;
+    font-size: 0.78em;
+    min-width: 0;
+}
+
+.term-line {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+}
+
+.term-prompt {
+    color: var(--prompt-color);
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.term-key {
+    color: #c9a959;
+    flex-shrink: 0;
+}
+
+.term-eq {
+    color: #666;
+    flex-shrink: 0;
+}
+
+.term-val {
+    color: var(--text-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+}
+
+.term-desc {
+    white-space: normal;
+    margin-top: 2px;
+    flex: 1;
+    min-height: 0;
+    align-items: flex-start;
+}
+
+.term-comment {
+    color: #888;
+    font-style: italic;
+    line-height: 1.45;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+}
+
+.term-action {
+    margin-top: auto;
+    padding-top: 8px;
+    border-top: 1px dashed #2a2a2a;
+}
+
+.term-run {
+    color: var(--prompt-color);
+    transition: color 0.2s;
+}
+
+.event-card:hover .term-run {
+    color: var(--accent-color);
+    text-shadow: 0 0 6px rgba(143, 188, 143, 0.6);
+}
+
+.term-cursor {
+    color: var(--prompt-color);
+    animation: termCursorBlink 1s steps(1) infinite;
+    margin-left: 2px;
+}
+
+.term-action-disabled .term-prompt,
+.term-action-disabled .term-comment {
+    color: #4a4a4a;
+}
+
+
+/* Loading animation */
+@keyframes eventPulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+}
+
+.events-loading {
+    text-align: center;
+    padding: 40px 0;
+    color: var(--prompt-color);
+    font-size: 0.9em;
+    animation: eventPulse 1.5s ease-in-out infinite;
+}
+
+/* ===== Events Detail View ===== */
+
+@keyframes detailSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.events-detail {
+    animation: detailSlideIn 0.3s ease both;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 6px;
+}
+
+.events-detail-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #333;
+}
+
+.events-back-btn {
+    background: transparent;
+    border: 1px solid #444;
+    color: var(--prompt-color);
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: var(--font-family);
+    font-size: 0.85em;
+    transition: background 0.2s, border-color 0.2s, transform 0.2s;
+    flex-shrink: 0;
+}
+
+.events-back-btn:hover {
+    background: rgba(143, 188, 143, 0.1);
+    border-color: var(--prompt-color);
+    transform: translateX(-2px);
+}
+
+.events-detail-info h2 {
+    margin: 0 0 4px 0;
+    font-size: 1.15em;
+    color: var(--accent-color);
+}
+
+.events-detail-meta {
+    font-size: 0.8em;
+    color: var(--prompt-color);
+}
+
+.events-detail-description {
+    margin: 8px 0 0 0;
+    font-size: 0.85em;
+    color: #aaa;
+    line-height: 1.5;
+    font-style: italic;
+}
+
+.events-detail-posts {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.event-post-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 18px;
+    background: #2a2725;
+    border: 1px solid #3a3a3a;
+    border-left: 3px solid var(--prompt-color);
+    border-radius: 8px;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s, border-color 0.2s, background 0.2s;
+    animation: eventCardIn 0.35s ease both;
+}
+
+.event-post-card:hover {
+    transform: translateX(4px);
+    background: #302d2a;
+    border-color: #555;
+    border-left-color: var(--accent-color);
+}
+
+.event-post-date {
+    font-size: 0.75em;
+    color: #777;
+    min-width: 90px;
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+}
+
+.event-post-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.event-post-body h3 {
+    margin: 0 0 4px 0;
+    font-size: 0.95em;
+    color: var(--accent-color);
+    font-weight: 600;
+}
+
+.event-post-body p {
+    margin: 0;
+    font-size: 0.8em;
+    color: #999;
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.event-post-arrow {
+    color: #555;
+    font-size: 1.2em;
+    transition: color 0.2s, transform 0.2s;
+    flex-shrink: 0;
+}
+
+.event-post-card:hover .event-post-arrow {
+    color: var(--prompt-color);
+    transform: translateX(4px);
+}
+
+.events-no-posts {
+    text-align: center;
+    padding: 40px 20px;
+    color: #777;
+    font-style: italic;
+}
+
+/* ===== Markdown tables inside blog/project posts ===== */
+article table {
+    width: auto;
+    max-width: 100%;
+    border-collapse: collapse;
+    margin: 24px 0;
+    font-size: 0.95em;
+    background-color: #332f2c;
+    border: 1px solid #444;
+}
+
+article table th,
+article table td {
+    padding: 10px 14px;
+    text-align: left;
+    border: 1px solid #444;
+    vertical-align: top;
+    word-break: break-word;
+}
+
+article table th {
+    background-color: #1e1b18;
+    color: var(--accent-color);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+    border-bottom: 2px solid var(--prompt-color);
+}
+
+article table tbody tr:nth-child(even) td {
+    background-color: #2a2724;
+}
+
+article table tbody tr:hover td {
+    background-color: #3a3532;
+}
+
+article table code {
+    background-color: #1e1b18;
+}
+
+/* ===== Side padding when the window is maximized =====
+   Match the text width of the non-maximized window (1000px container - 20px*2 padding = 960px).
+*/
+.container.maximized .terminal-content {
+    padding-left: max(20px, calc((100vw - 960px) / 2));
+    padding-right: max(20px, calc((100vw - 960px) / 2));
 }
 

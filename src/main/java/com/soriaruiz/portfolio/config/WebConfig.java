@@ -25,12 +25,23 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         // Serve images from the posts directory - restrict to common image types to prevent LFI/source exposure
-        registry.addResourceHandler("/posts/**/*.png", 
-                                  "/posts/**/*.jpg", 
-                                  "/posts/**/*.jpeg", 
-                                  "/posts/**/*.gif", 
-                                  "/posts/**/*.webp", 
-                                  "/posts/**/*.svg")
+        registry.addResourceHandler("/posts/**/*.png",
+                                  "/posts/**/*.jpg",
+                                  "/posts/**/*.jpeg",
+                                  "/posts/**/*.gif",
+                                  "/posts/**/*.webp",
+                                  "/posts/**/*.svg",
+                                  "/posts/**/*.mp4",
+                                  "/posts/**/*.webm",
+                                  "/posts/**/*.mov")
                 .addResourceLocations("classpath:/posts/");
+
+        registry.addResourceHandler("/eventos/images/**/*.png",
+                                  "/eventos/images/**/*.jpg",
+                                  "/eventos/images/**/*.jpeg",
+                                  "/eventos/images/**/*.gif",
+                                  "/eventos/images/**/*.webp",
+                                  "/eventos/images/**/*.svg")
+                .addResourceLocations("classpath:/eventos/images/");
     }
 }
