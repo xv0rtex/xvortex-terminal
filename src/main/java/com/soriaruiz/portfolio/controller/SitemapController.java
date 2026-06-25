@@ -55,11 +55,15 @@ public class SitemapController {
 
     private void addUrl(StringBuilder xml, String loc, String lastmod, String changefreq, String priority) {
         xml.append("  <url>\n")
-           .append("    <loc>").append(loc).append("</loc>\n")
+           .append("    <loc>").append(escapeXml(loc)).append("</loc>\n")
            .append("    <lastmod>").append(lastmod).append("</lastmod>\n")
            .append("    <changefreq>").append(changefreq).append("</changefreq>\n")
            .append("    <priority>").append(priority).append("</priority>\n")
            .append("  </url>\n");
+    }
+
+    private String escapeXml(String value) {
+        return value.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
     }
 
     private String buildBaseUrl(HttpServletRequest request) {
