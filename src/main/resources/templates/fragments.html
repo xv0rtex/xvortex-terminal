@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" th:fragment="layout(pageTitle, pageDescription, content)">
+<html xmlns:th="http://www.thymeleaf.org" th:fragment="layout(pageTitle, pageDescription, content)" lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -783,10 +783,10 @@
     }
 
 </script>
-<script th:src="@{/js/terminal.js(v=2)}"></script>
-<script th:src="@{/js/hack.js(v=2)}"></script>
-<script th:src="@{/js/activity-monitor.js(v=3)}"></script>
-<script th:src="@{/js/events.js(v=2)}"></script>
+<script th:src="@{/js/terminal.js(v=2)}" defer></script>
+<script th:src="@{/js/hack.js(v=2)}" defer></script>
+<script th:src="@{/js/activity-monitor.js(v=3)}" defer></script>
+<script th:src="@{/js/events.js(v=2)}" defer></script>
 
 </body>
 </html>
