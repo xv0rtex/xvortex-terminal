@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments :: layout(~{::main})}">
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments :: layout(${pageTitle} + ' | Diego Soria Ruiz', 'Artículos y proyectos de ' + ${pageTitle} + ' sobre ciberseguridad, hacking ético, CTFs y desarrollo de software por Diego Soria Ruiz.', ~{::main})}">
 <head>
     <title th:text="'dsr - ' + ${pageTitle}">dsr - Blog</title>
 </head>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments :: layout(~{::main})}">
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments :: layout(${post.title} + ' | Diego Soria Ruiz', ${post.excerpt ?: post.title}, ~{::main})}">
 <head>
     <title th:text="${post.title} + ' - dsr'">Post Title</title>
 </head>
@@ -18,6 +18,8 @@
             </div>
         </div>
         
+        <script type="application/ld+json" th:utext="${articleJsonLd}"></script>
+
         <article th:utext="${post.content}">
             Content
         </article>

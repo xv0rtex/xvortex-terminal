@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments :: layout(~{::main})}">
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments :: layout('Error ' + ${status} + ' | Diego Soria Ruiz', 'Página no encontrada en el portfolio de Diego Soria Ruiz.', ~{::main})}">
 <head>
     <title>Error - dsr</title>
 </head>

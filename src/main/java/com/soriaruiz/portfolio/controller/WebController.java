@@ -78,12 +78,41 @@ public class WebController {
     public String blogPost(@PathVariable String id, Model model) {
         Optional<BlogPost> post = blogService.getPost(id);
         if (post.isPresent()) {
-            model.addAttribute("post", post.get());
-            String type = post.get().getType();
+            BlogPost p = post.get();
+            model.addAttribute("post", p);
+            String type = p.getType();
             model.addAttribute("backUrl", "proyects".equals(type) ? "/proyectos" : "/blog");
+            model.addAttribute("articleJsonLd", buildArticleJsonLd(p));
             return "post";
         }
         return "redirect:/";
+    }
+
+    private String buildArticleJsonLd(BlogPost post) {
+        String title = escapeJson(post.getTitle());
+        String description = escapeJson(post.getExcerpt() != null ? post.getExcerpt() : post.getTitle());
+        String datePublished = post.getDate() != null ? post.getDate().toString() : "";
+        String keywords = post.getTags() != null ? String.join(", ", post.getTags()) : "";
+        return String.format("""
+            {
+              "@context": "https://schema.org",
+              "@type": "BlogPosting",
+              "headline": "%s",
+              "description": "%s",
+              "author": {"@type": "Person", "name": "Diego Soria Ruiz"},
+              "datePublished": "%s",
+              "keywords": "%s",
+              "publisher": {"@type": "Person", "name": "Diego Soria Ruiz"}
+            }""", title, description, datePublished, keywords);
+    }
+
+    private String escapeJson(String value) {
+        if (value == null) return "";
+        return value.replace("\\", "\\\\")
+                    .replace("\"", "\\\"")
+                    .replace("\n", "\\n")
+                    .replace("\r", "\\r")
+                    .replaceAll("<[^>]+>", "");
     }
 
     @GetMapping("/services")
